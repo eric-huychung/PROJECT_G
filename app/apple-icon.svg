@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="PROJECT G">
+  <rect width="180" height="180" rx="40" fill="#232F3E"/>
+  <text
+    x="90"
+    y="128"
+    text-anchor="middle"
+    font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+    font-size="132"
+    font-weight="600"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="5.5"
+    paint-order="stroke fill"
+  >G</text>
+</svg>

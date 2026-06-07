@@ -1,7 +1,9 @@
 /**
- * Home route placeholder — UI not implemented yet.
+ * Home route.
  */
 
+import { LandingPage } from "@/components/home/landing_page";
+
 export default function HomePage() {
-  return null;
+  return <LandingPage />;
 }

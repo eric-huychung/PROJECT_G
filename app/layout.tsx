@@ -1,12 +1,14 @@
 /**
- * Root layout — minimal shell until UI is built.
+ * Root layout and global metadata.
  */
 
 import type { Metadata } from "next";
 
+import "./globals.css";
+
 export const metadata: Metadata = {
-  title: "PROJECT_G",
-  description: "Disposable intelligence workspace for BizOps",
+  title: "PROJECT G",
+  description: "Drop a CSV, ask a question, get charts.",
 };
 
 export default function RootLayout({
@@ -15,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className="h-full overflow-x-clip antialiased">
+      <body className="min-h-full overflow-x-clip font-sans">{children}</body>
     </html>
   );
 }

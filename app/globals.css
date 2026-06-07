@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../app/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../lib/**/*.{js,ts,jsx,tsx,mdx}";
+
+:root {
+  --g-navy: #232f3e;
+  --g-white: #ffffff;
+  --g-red: #7a0000;
+  --g-red-hover: #5c0000;
+  --g-ink: #1d1d1f;
+  --g-gray: #86868b;
+  --g-fill: #f5f5f7;
+  --g-shadow-hover: 0 8px 30px rgb(35 47 62 / 0.08);
+  --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-g-navy: var(--g-navy);
+  --color-g-white: var(--g-white);
+  --color-g-red: var(--g-red);
+  --color-g-red-hover: var(--g-red-hover);
+  --color-g-ink: var(--g-ink);
+  --color-g-gray: var(--g-gray);
+  --color-g-fill: var(--g-fill);
+  --font-sans: var(--font-system);
+}
+
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  background: var(--g-white);
+  color: var(--g-ink);
+  font-family: var(--font-system);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.text-outline-light {
+  color: transparent;
+  -webkit-text-stroke: 0.5px rgb(255 255 255 / 0.92);
+  paint-order: stroke fill;
+}
+
+.glass-field {
+  background: rgb(245 245 247 / 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.glass-field:focus-within {
+  background: rgb(245 245 247 / 0.9);
+}
+
+.glass-field-interactive {
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.glass-field-interactive:hover,
+.glass-field-interactive.is-active {
+  background: rgb(245 245 247 / 0.95);
+  box-shadow: var(--g-shadow-hover);
+}
+
+.glass-field-interactive.is-active {
+  transform: scale(1.01);
+}
+
+.glass-chip {
+  background: rgb(255 255 255 / 0.6);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.glass-chip:hover {
+  background: rgb(245 245 247 / 0.95);
+  box-shadow: var(--g-shadow-hover);
+  transform: scale(1.05);
+}
