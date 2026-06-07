@@ -1,0 +1,59 @@
+---
+description: Coding practices and style for project_goldie
+alwaysApply: true
+---
+
+# Coding Style
+
+- Prefer **modular, reusable components** and **small, focused functions**—one clear responsibility per unit.
+- Follow framework and ecosystem best practices; keep code **clean, short, and simple**.
+- Avoid over-engineering: no premature abstractions, helpers used once, or extra layers without clear payoff.
+- Match existing patterns in the repo (naming, folder layout, imports) before introducing new conventions.
+
+## Naming conventions
+
+- Default: **snake_case** for files, folders, variables, functions, types, and props (e.g. `parse_csv`, `chart_panel.tsx`).
+- **Exceptions:** React components **PascalCase** (`ChartPanel` in `chart_panel.tsx`); env vars **SCREAMING_SNAKE_CASE** (`DATABASE_URL`).
+- No `camelCase` in new code unless an external API requires it.
+
+## Comments
+
+Use **JSDoc** (`/** ... */`)—the TypeScript/JavaScript standard—not plain block comments.
+
+### File header (top of every file)
+
+Add a short file-level docblock: what the file is for and its role in the app.
+
+```typescript
+/**
+ * CSV parsing utilities used by the upload API and chart components.
+ */
+```
+
+### Functions
+
+Document **exported** functions and any non-trivial helpers. Keep it short: what it does, what it returns, and each parameter.
+
+```typescript
+/**
+ * Merges two column schemas and returns the unified field list.
+ *
+ * @param base_fields - Existing schema fields from the dataset
+ * @param incoming_fields - New fields from the uploaded file
+ * @returns Merged schema sorted by display name
+ */
+export function merge_schemas(
+  base_fields: field_schema[],
+  incoming_fields: field_schema[],
+): field_schema[] {
+```
+
+- Use `@param name - description` for each parameter (types come from TypeScript; add type in the description only when it clarifies intent).
+- Use `@returns description` when the return value is not obvious.
+- For React components, use `@param props` or document meaningful props individually if the API is public/reusable.
+
+### When to skip or stay minimal
+
+- Do not comment obvious one-liners or self-explanatory private helpers.
+- Prefer clear names over comments; use inline comments only for non-obvious business rules or tricky logic.
+- No commented-out code—delete it (git has history).

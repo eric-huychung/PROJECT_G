@@ -1,0 +1,18 @@
+---
+description: Stack, deployment, and project structure for project_goldie
+alwaysApply: true
+---
+
+# Architecture
+
+- **Next.js** (App Router) deployed on **Vercel**.
+- API routes in `app/api/` run as **serverless functions** on Vercel.
+
+## Folder structure
+
+- UI routes and layouts: `app/`
+- Reusable UI: `components/`
+- Serverless APIs: `app/api/<name>/route.ts`
+- Shared non-UI logic: `lib/` (pure utilities; avoid React in generic helpers unless intentional)
+
+Add new sections here as the system grows (data flow, auth, storage, external services).

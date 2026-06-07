@@ -1,0 +1,12 @@
+---
+description: Where and how to write project documentation
+alwaysApply: true
+---
+
+# Documentation Rules
+
+- Put **all generated documentation** under `docs/`.
+- **Update existing docs** in place instead of creating duplicate or versioned files (e.g. avoid `guide-v2.md` when `guide.md` can be extended).
+- Keep docs **short and simple**: purpose, key decisions, and how to run/use—skip boilerplate and repeated code dumps.
+- Do not add markdown files to the repo root or scattered folders unless the user explicitly requests it.
+- Code should stay self-explanatory; use `docs/` for architecture, setup, and non-obvious business context.

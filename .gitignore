@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+.next/
+out/
+build/
+
+# env
+.env
+.env*.local
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# typescript
+next-env.d.ts
+*.tsbuildinfo
+
+# vercel
+.vercel
+
+# misc
+.DS_Store
+
+# local planning docs (not committed yet)
+docs/
+
+# POC reference (not part of this app)
+project_goldie/
