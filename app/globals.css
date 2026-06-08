@@ -88,3 +88,14 @@ body {
   box-shadow: var(--g-shadow-hover);
   transform: scale(1.05);
 }
+
+@media print {
+  body {
+    background: white;
+  }
+
+  header,
+  .print\:hidden {
+    display: none !important;
+  }
+}
