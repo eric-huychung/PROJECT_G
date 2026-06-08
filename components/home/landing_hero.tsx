@@ -27,6 +27,7 @@ type landing_prompt_props = {
   on_prompt_submit: (event: React.FormEvent) => void;
   on_prompt_select: (value: string) => void;
   can_analyze: boolean;
+  is_ingesting: boolean;
 };
 
 /**
@@ -38,6 +39,7 @@ export function LandingPrompt({
   on_prompt_submit,
   on_prompt_select,
   can_analyze,
+  is_ingesting,
 }: landing_prompt_props) {
   return (
     <div>
@@ -51,16 +53,18 @@ export function LandingPrompt({
         />
         <button
           type="submit"
-          disabled={!can_analyze}
+          disabled={!can_analyze || is_ingesting}
           className={cn(
             "absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl transition-all",
-            can_analyze
+            can_analyze && !is_ingesting
               ? "bg-g-red text-g-white hover:bg-g-red-hover"
               : "cursor-not-allowed bg-neutral-200 text-g-gray",
           )}
-          aria-label="Analyze"
+          aria-label={is_ingesting ? "Loading dataset" : "Analyze"}
         >
-          <ArrowRight className="h-5 w-5" />
+          <ArrowRight
+            className={cn("h-5 w-5", is_ingesting && "animate-pulse")}
+          />
         </button>
       </form>
 

@@ -10,25 +10,46 @@ import { useState } from "react";
 import { GLogo } from "@/components/branding/g_logo";
 import { DropZone } from "@/components/home/drop_zone";
 import { LandingHeadline, LandingPrompt } from "@/components/home/landing_hero";
+import { UserErrorBanner } from "@/components/ui/user_error_banner";
+import { to_user_error } from "@/lib/errors/ingest_errors";
+import type { user_facing_error } from "@/lib/types/user_error";
 
 export function LandingPage() {
   const router = useRouter();
   const [csv_file, set_csv_file] = useState<File | null>(null);
   const [prompt, set_prompt] = useState("");
+  const [is_ingesting, set_is_ingesting] = useState(false);
+  const [ingest_error, set_ingest_error] = useState<user_facing_error | null>(
+    null,
+  );
 
   const can_analyze = Boolean(csv_file && prompt.trim());
 
-  const handle_analyze = (event: React.FormEvent) => {
+  const handle_file_change = (file: File | null) => {
+    set_csv_file(file);
+    set_ingest_error(null);
+  };
+
+  const handle_analyze = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!can_analyze || !csv_file) {
+    if (!can_analyze || !csv_file || is_ingesting) {
       return;
     }
 
-    const params = new URLSearchParams({
-      file: csv_file.name,
-      size: String(Math.round(csv_file.size / 1024)),
-    });
-    router.push(`/discover?${params.toString()}`);
+    set_is_ingesting(true);
+    set_ingest_error(null);
+
+    try {
+      const { upload_csv_workspace } = await import(
+        "@/lib/workspace/csv_workspace"
+      );
+      await upload_csv_workspace(csv_file, prompt);
+      router.push("/discover");
+    } catch (error) {
+      set_ingest_error(to_user_error(error, "upload"));
+    } finally {
+      set_is_ingesting(false);
+    }
   };
 
   return (
@@ -51,14 +72,19 @@ export function LandingPage() {
         <LandingHeadline />
 
         <div className="mt-12 space-y-6">
-          <DropZone file={csv_file} on_file_change={set_csv_file} />
+          <DropZone file={csv_file} on_file_change={handle_file_change} />
           <LandingPrompt
             prompt={prompt}
             on_prompt_change={set_prompt}
             on_prompt_submit={handle_analyze}
             on_prompt_select={set_prompt}
             can_analyze={can_analyze}
+            is_ingesting={is_ingesting}
           />
+          {is_ingesting ? (
+            <p className="text-sm text-g-gray">Preparing your dataset…</p>
+          ) : null}
+          {ingest_error ? <UserErrorBanner error={ingest_error} /> : null}
         </div>
       </main>
 

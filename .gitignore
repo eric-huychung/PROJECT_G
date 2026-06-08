@@ -31,5 +31,11 @@ next-env.d.ts
 # local planning docs (not committed yet)
 docs/
 
+# data files
+data/
+
 # POC reference (not part of this app)
 project_goldie/
+
+# readme
+README.md

@@ -4,9 +4,8 @@
 
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 import { GLogo } from "@/components/branding/g_logo";
 import { CommonQuestionsSection } from "@/components/discover/common_questions_section";
@@ -14,28 +13,58 @@ import { DatasetSummaryCard } from "@/components/discover/dataset_summary_card";
 import { DiscoverHeader } from "@/components/discover/discover_header";
 import { GenerateReportButton } from "@/components/discover/generate_report_button";
 import { QuickInsightsSection } from "@/components/discover/quick_insights_section";
-import { DEFAULT_DATASET_SUMMARY } from "@/lib/mock/discover_data";
+import { UserErrorBanner } from "@/components/ui/user_error_banner";
+import { to_user_error } from "@/lib/errors/ingest_errors";
 import type { dataset_summary } from "@/lib/types/discover";
+import type { user_facing_error } from "@/lib/types/user_error";
+
+type discover_load_state =
+  | { status: "loading" }
+  | { status: "ready"; summary: dataset_summary }
+  | { status: "empty" }
+  | { status: "error"; error: user_facing_error };
 
 export function DiscoverPage() {
-  const search_params = useSearchParams();
+  const [load_state, set_load_state] = useState<discover_load_state>({
+    status: "loading",
+  });
 
-  const summary = useMemo((): dataset_summary => {
-    const file_name = search_params.get("file");
-    const file_size = search_params.get("size");
+  useEffect(() => {
+    let cancelled = false;
 
-    if (!file_name) {
-      return DEFAULT_DATASET_SUMMARY;
+    async function load_workspace() {
+      try {
+        const { rehydrate_csv_workspace } = await import(
+          "@/lib/workspace/csv_workspace"
+        );
+        const summary = await rehydrate_csv_workspace();
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!summary) {
+          set_load_state({ status: "empty" });
+          return;
+        }
+
+        set_load_state({ status: "ready", summary });
+      } catch (error) {
+        if (!cancelled) {
+          set_load_state({
+            status: "error",
+            error: to_user_error(error, "rehydrate"),
+          });
+        }
+      }
     }
 
-    return {
-      ...DEFAULT_DATASET_SUMMARY,
-      name: file_name,
-      file_size_kb: file_size
-        ? Number(file_size)
-        : DEFAULT_DATASET_SUMMARY.file_size_kb,
+    load_workspace();
+
+    return () => {
+      cancelled = true;
     };
-  }, [search_params]);
+  }, []);
 
   return (
     <div className="relative flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-g-white">
@@ -56,11 +85,46 @@ export function DiscoverPage() {
       </header>
 
       <main className="relative z-10 mx-auto w-full min-w-0 max-w-5xl flex-1 overflow-auto px-6 py-10 sm:px-8 sm:py-14">
-        <DiscoverHeader dataset_name={summary.name} />
-        <DatasetSummaryCard summary={summary} />
-        <CommonQuestionsSection />
-        <QuickInsightsSection />
-        <GenerateReportButton />
+        {load_state.status === "loading" ? (
+          <p className="mb-8 text-sm text-g-gray">Loading dataset…</p>
+        ) : null}
+
+        {load_state.status === "empty" ? (
+          <div className="mb-8 rounded-3xl border border-dashed border-neutral-300 bg-g-white/60 p-8 text-center">
+            <p className="text-g-ink">No dataset found on this device.</p>
+            <p className="mt-2 text-sm text-g-gray">
+              Drop a CSV on the landing page to get started.
+            </p>
+            <Link
+              href="/"
+              className="mt-4 inline-block text-sm font-medium text-g-red hover:text-g-red-hover"
+            >
+              Go to landing
+            </Link>
+          </div>
+        ) : null}
+
+        {load_state.status === "error" ? (
+          <div className="mb-8">
+            <UserErrorBanner error={load_state.error} />
+            <Link
+              href="/"
+              className="mt-4 inline-block text-sm font-medium text-g-red hover:text-g-red-hover"
+            >
+              Upload a new CSV
+            </Link>
+          </div>
+        ) : null}
+
+        {load_state.status === "ready" ? (
+          <>
+            <DiscoverHeader dataset_name={load_state.summary.name} />
+            <DatasetSummaryCard summary={load_state.summary} />
+            <CommonQuestionsSection />
+            <QuickInsightsSection />
+            <GenerateReportButton />
+          </>
+        ) : null}
       </main>
     </div>
   );
