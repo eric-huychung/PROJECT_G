@@ -68,6 +68,18 @@ export async function load_workspace(): Promise<workspace_snapshot | null> {
   }
 }
 
+/** Merges partial fields into the current workspace snapshot. */
+export async function patch_workspace(
+  partial: Partial<workspace_snapshot>,
+): Promise<void> {
+  const current = await load_workspace();
+  if (!current) {
+    throw new Error("No workspace to update.");
+  }
+
+  await save_workspace({ ...current, ...partial });
+}
+
 /** Deletes the saved workspace — used by clear-workspace. */
 export async function clear_workspace(): Promise<void> {
   const db = await open_db();

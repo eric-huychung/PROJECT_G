@@ -84,6 +84,27 @@ export function to_user_error(
     };
   }
 
+  if (/rate.limit|rate-limited|rate_limit|retry in ~\d/i.test(normalized)) {
+    const seconds_match = normalized.match(/retry in ~(\d+)/i);
+    const seconds_hint = seconds_match?.[1]
+      ? ` Wait about ${seconds_match[1]} seconds, then refresh or click Retry.`
+      : " Wait about 90 seconds, then refresh or click Retry.";
+
+    return {
+      title: "Analysis hit the AI rate limit",
+      message: `The free-tier gateway paused new AI calls.${seconds_hint}`,
+      hint: "Re-uploading immediately will fail too. Add Vercel AI credits to skip limits, or use Retry once the countdown clears.",
+    };
+  }
+
+  if (/analysis service|insight request|couldn't reach/i.test(normalized)) {
+    return {
+      title: "We couldn't generate insights",
+      message: "The AI analysis service didn't respond in time.",
+      hint: "Refresh the page in a minute. If it keeps failing, check your AI Gateway key.",
+    };
+  }
+
   if (context === "rehydrate") {
     return {
       title: "We couldn't reopen your saved dataset",

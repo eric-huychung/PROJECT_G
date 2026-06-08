@@ -34,6 +34,10 @@ docs/
 # data files
 data/
 
+# env
+.env
+.env.local
+
 # POC reference (not part of this app)
 project_goldie/
 

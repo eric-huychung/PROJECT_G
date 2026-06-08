@@ -1,21 +1,26 @@
 /**
- * Dataset summary card on Discover — stats and description.
+ * Dataset summary card on Discover — stats and AI-generated description.
  */
 
 import { FileSpreadsheet } from "lucide-react";
 
 import { format_dataset_stats_line } from "@/lib/discover/format_dataset_stats";
-import { DATASET_BLURB } from "@/lib/mock/discover_data";
 import type { dataset_summary } from "@/lib/types/discover";
 
 type dataset_summary_card_props = {
   summary: dataset_summary;
+  plan_summary: string | null;
+  is_generating: boolean;
 };
 
 /**
- * @param props - Dataset summary stats
+ * @param props - Dataset summary stats and optional AI blurb
  */
-export function DatasetSummaryCard({ summary }: dataset_summary_card_props) {
+export function DatasetSummaryCard({
+  summary,
+  plan_summary,
+  is_generating,
+}: dataset_summary_card_props) {
   const stats_line = format_dataset_stats_line(summary);
 
   return (
@@ -29,7 +34,13 @@ export function DatasetSummaryCard({ summary }: dataset_summary_card_props) {
             {summary.name}
           </h2>
           <p className="mb-3 text-sm text-g-gray">{stats_line}</p>
-          <p className="max-w-2xl text-sm text-g-gray">{DATASET_BLURB}</p>
+          {is_generating ? (
+            <p className="max-w-2xl animate-pulse text-sm text-g-gray">
+              Analyzing schema…
+            </p>
+          ) : plan_summary ? (
+            <p className="max-w-2xl text-sm text-g-gray">{plan_summary}</p>
+          ) : null}
         </div>
       </div>
     </section>

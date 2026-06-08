@@ -3,6 +3,7 @@
  */
 
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 
@@ -18,7 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full overflow-x-clip antialiased">
-      <body className="min-h-full overflow-x-clip font-sans">{children}</body>
+      <body className="min-h-full overflow-x-clip font-sans">
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

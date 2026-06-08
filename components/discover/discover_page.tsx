@@ -1,70 +1,28 @@
 /**
- * Discover page layout — dataset exploration and question selection.
+ * Discover page layout — dataset exploration and insight generation.
  */
 
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { GLogo } from "@/components/branding/g_logo";
-import { CommonQuestionsSection } from "@/components/discover/common_questions_section";
 import { DatasetSummaryCard } from "@/components/discover/dataset_summary_card";
 import { DiscoverHeader } from "@/components/discover/discover_header";
 import { GenerateReportButton } from "@/components/discover/generate_report_button";
-import { QuickInsightsSection } from "@/components/discover/quick_insights_section";
+import {
+  use_insights_workspace,
+} from "@/components/discover/insights_workspace_provider";
+import { SuggestedQuestionsInsightsSection } from "@/components/discover/suggested_questions_insights_section";
 import { UserErrorBanner } from "@/components/ui/user_error_banner";
-import { to_user_error } from "@/lib/errors/ingest_errors";
-import type { dataset_summary } from "@/lib/types/discover";
-import type { user_facing_error } from "@/lib/types/user_error";
-
-type discover_load_state =
-  | { status: "loading" }
-  | { status: "ready"; summary: dataset_summary }
-  | { status: "empty" }
-  | { status: "error"; error: user_facing_error };
 
 export function DiscoverPage() {
-  const [load_state, set_load_state] = useState<discover_load_state>({
-    status: "loading",
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load_workspace() {
-      try {
-        const { rehydrate_csv_workspace } = await import(
-          "@/lib/workspace/csv_workspace"
-        );
-        const summary = await rehydrate_csv_workspace();
-
-        if (cancelled) {
-          return;
-        }
-
-        if (!summary) {
-          set_load_state({ status: "empty" });
-          return;
-        }
-
-        set_load_state({ status: "ready", summary });
-      } catch (error) {
-        if (!cancelled) {
-          set_load_state({
-            status: "error",
-            error: to_user_error(error, "rehydrate"),
-          });
-        }
-      }
-    }
-
-    load_workspace();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const {
+    status,
+    error,
+    summary,
+    plan_summary,
+  } = use_insights_workspace();
 
   return (
     <div className="relative flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-g-white">
@@ -85,11 +43,11 @@ export function DiscoverPage() {
       </header>
 
       <main className="relative z-10 mx-auto w-full min-w-0 max-w-5xl flex-1 overflow-auto px-6 py-10 sm:px-8 sm:py-14">
-        {load_state.status === "loading" ? (
+        {status === "loading" ? (
           <p className="mb-8 text-sm text-g-gray">Loading dataset…</p>
         ) : null}
 
-        {load_state.status === "empty" ? (
+        {status === "empty" ? (
           <div className="mb-8 rounded-3xl border border-dashed border-neutral-300 bg-g-white/60 p-8 text-center">
             <p className="text-g-ink">No dataset found on this device.</p>
             <p className="mt-2 text-sm text-g-gray">
@@ -104,9 +62,9 @@ export function DiscoverPage() {
           </div>
         ) : null}
 
-        {load_state.status === "error" ? (
+        {status === "error" && error ? (
           <div className="mb-8">
-            <UserErrorBanner error={load_state.error} />
+            <UserErrorBanner error={error} />
             <Link
               href="/"
               className="mt-4 inline-block text-sm font-medium text-g-red hover:text-g-red-hover"
@@ -116,12 +74,20 @@ export function DiscoverPage() {
           </div>
         ) : null}
 
-        {load_state.status === "ready" ? (
+        {summary && status !== "empty" && status !== "error" ? (
           <>
-            <DiscoverHeader dataset_name={load_state.summary.name} />
-            <DatasetSummaryCard summary={load_state.summary} />
-            <CommonQuestionsSection />
-            <QuickInsightsSection />
+            {error ? (
+              <div className="mb-8">
+                <UserErrorBanner error={error} />
+              </div>
+            ) : null}
+            <DiscoverHeader dataset_name={summary.name} />
+            <DatasetSummaryCard
+              summary={summary}
+              plan_summary={plan_summary}
+              is_generating={status === "generating" && !plan_summary}
+            />
+            <SuggestedQuestionsInsightsSection />
             <GenerateReportButton />
           </>
         ) : null}
