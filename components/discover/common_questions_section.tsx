@@ -5,9 +5,8 @@
 "use client";
 
 import { useState } from "react";
-import { HelpCircle, Plus } from "lucide-react";
+import { Check, HelpCircle, Plus } from "lucide-react";
 
-import { TrackQuestionButton } from "@/components/discover/track_question_button";
 import { use_tracked_questions } from "@/components/discover/tracked_questions_provider";
 import { Input } from "@/components/ui/input";
 import { COMMON_QUESTIONS } from "@/lib/mock/discover_data";
@@ -19,7 +18,7 @@ type custom_question = {
 };
 
 export function CommonQuestionsSection() {
-  const { is_tracked } = use_tracked_questions();
+  const { is_tracked, toggle_track } = use_tracked_questions();
   const [draft, set_draft] = useState("");
   const [custom_questions, set_custom_questions] = useState<custom_question[]>(
     [],
@@ -51,35 +50,27 @@ export function CommonQuestionsSection() {
         </span>
       </div>
       <p className="mb-4 text-sm text-g-gray">
-        Pick questions to explore, or write your own below.
+        Click a question to select it, or write your own below.
       </p>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {COMMON_QUESTIONS.map((question) => {
-          const tracked = is_tracked(question.id);
+        {COMMON_QUESTIONS.map((question) => (
+          <QuestionCard
+            key={question.id}
+            text={question.text}
+            tracked={is_tracked(question.id)}
+            on_toggle={() => toggle_track(question.id)}
+          />
+        ))}
 
-          return (
-            <QuestionCard
-              key={question.id}
-              question_id={question.id}
-              text={question.text}
-              tracked={tracked}
-            />
-          );
-        })}
-
-        {custom_questions.map((question) => {
-          const tracked = is_tracked(question.id);
-
-          return (
-            <QuestionCard
-              key={question.id}
-              question_id={question.id}
-              text={question.text}
-              tracked={tracked}
-            />
-          );
-        })}
+        {custom_questions.map((question) => (
+          <QuestionCard
+            key={question.id}
+            text={question.text}
+            tracked={is_tracked(question.id)}
+            on_toggle={() => toggle_track(question.id)}
+          />
+        ))}
       </div>
 
       <form
@@ -114,23 +105,28 @@ export function CommonQuestionsSection() {
 }
 
 type question_card_props = {
-  question_id: string;
   text: string;
   tracked: boolean;
+  on_toggle: () => void;
 };
 
-function QuestionCard({ question_id, text, tracked }: question_card_props) {
+function QuestionCard({ text, tracked, on_toggle }: question_card_props) {
   return (
     <article
+      onClick={on_toggle}
       className={cn(
-        "glass-field rounded-3xl p-5 transition-all",
-        tracked && "border-g-navy/15 bg-g-white/80 ring-1 ring-g-navy/20",
+        "glass-field glass-field-interactive group relative cursor-pointer rounded-3xl p-5 transition-all",
+        tracked && "ring-1 ring-g-navy/25",
       )}
     >
-      <p className="mb-3 text-sm leading-relaxed text-g-ink">{text}</p>
-      <div className="flex justify-end">
-        <TrackQuestionButton question_id={question_id} />
-      </div>
+      {tracked ? (
+        <span className="absolute right-4 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-g-navy text-g-white">
+          <Check className="h-3.5 w-3.5" />
+        </span>
+      ) : null}
+      <p className="pr-8 text-sm leading-relaxed text-g-ink transition-colors duration-200 group-hover:text-g-navy">
+        {text}
+      </p>
     </article>
   );
 }
