@@ -4,6 +4,7 @@
 
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { GLogo } from "@/components/branding/g_logo";
@@ -11,18 +12,23 @@ import { DropZone } from "@/components/home/drop_zone";
 import { LandingHeadline, LandingPrompt } from "@/components/home/landing_hero";
 
 export function LandingPage() {
+  const router = useRouter();
   const [csv_file, set_csv_file] = useState<File | null>(null);
   const [prompt, set_prompt] = useState("");
-  const [is_queued, set_is_queued] = useState(false);
 
   const can_analyze = Boolean(csv_file && prompt.trim());
 
   const handle_analyze = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!can_analyze) {
+    if (!can_analyze || !csv_file) {
       return;
     }
-    set_is_queued(true);
+
+    const params = new URLSearchParams({
+      file: csv_file.name,
+      size: String(Math.round(csv_file.size / 1024)),
+    });
+    router.push(`/discover?${params.toString()}`);
   };
 
   return (
@@ -54,10 +60,6 @@ export function LandingPage() {
             can_analyze={can_analyze}
           />
         </div>
-
-        {is_queued && (
-          <p className="mt-6 text-sm text-g-gray">Working on it…</p>
-        )}
       </main>
 
       <footer className="relative z-10 w-full shrink-0 pb-10 text-center">
