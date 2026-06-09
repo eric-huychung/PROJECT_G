@@ -39,10 +39,8 @@ export function is_insight_rate_limit_error(error: unknown): boolean {
  */
 export function insight_api_error_response(
   error: unknown,
-  route_label: string,
+  _route_label: string,
 ): Response {
-  console.error(`Insights ${route_label}:`, error);
-
   if (is_insight_rate_limit_error(error)) {
     return Response.json(
       { error: INSIGHTS_RATE_LIMIT_MESSAGE },

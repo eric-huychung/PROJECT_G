@@ -45,7 +45,7 @@ async function create_duckdb(): Promise<duckdb_handle> {
   );
 
   const worker = new Worker(worker_url);
-  const logger = new duckdb.ConsoleLogger();
+  const logger = new duckdb.VoidLogger();
   const db = new duckdb.AsyncDuckDB(logger, worker);
 
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);

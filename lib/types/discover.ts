@@ -2,17 +2,6 @@
  * Discover workspace types — questions, insights, traces, and dataset summary.
  */
 
-export type discover_question_item = {
-  id: string;
-  text: string;
-};
-
-export type discover_quick_insight = {
-  id: string;
-  fact: string;
-  suggested_question: string;
-};
-
 export type insight_trace_highlight = {
   row: number;
   col: number;

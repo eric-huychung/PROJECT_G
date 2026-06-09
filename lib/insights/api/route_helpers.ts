@@ -12,7 +12,6 @@ export function gateway_not_configured_response(): Response | null {
     return null;
   }
 
-  console.error("Insights API: AI_GATEWAY_API_KEY not configured");
   return Response.json(
     { error: INSIGHTS_UNAVAILABLE_MESSAGE },
     { status: 503 },

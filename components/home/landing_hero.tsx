@@ -69,14 +69,14 @@ export function LandingPrompt({
       </form>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {SUGGESTED_PROMPTS.map((label) => (
+        {SUGGESTED_PROMPTS.map((item) => (
           <button
-            key={label}
+            key={item.label}
             type="button"
-            onClick={() => on_prompt_select(label)}
+            onClick={() => on_prompt_select(item.text)}
             className="glass-chip rounded-full px-4 py-1.5 text-sm text-g-ink/80 hover:text-g-navy"
           >
-            {label}
+            {item.label}
           </button>
         ))}
       </div>
