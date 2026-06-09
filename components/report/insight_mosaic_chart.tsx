@@ -64,7 +64,7 @@ export function InsightMosaicChart({
   return (
     <div
       ref={container_ref}
-      className="report-plot min-h-[280px] w-full overflow-x-auto print:overflow-visible"
+      className="report-plot min-h-[280px] w-full overflow-x-auto overflow-y-auto print:overflow-visible"
       aria-label="Insight chart"
     />
   );

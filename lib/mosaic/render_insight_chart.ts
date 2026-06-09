@@ -8,6 +8,8 @@ import {
   resolve_chart_spec,
   type chart_mark,
 } from "@/lib/mosaic/query_result_to_rows";
+import { resolve_chart_axis_layout } from "@/lib/mosaic/chart_axis_layout";
+import type { chart_axis_layout } from "@/lib/mosaic/chart_axis_layout";
 
 type mosaic_module = typeof import("@uwdata/vgplot");
 
@@ -95,13 +97,47 @@ export async function render_insight_chart({
   }
 
   const resolved = resolve_chart_spec(result, spec);
+  const layout = resolve_chart_axis_layout(
+    resolved.mark,
+    rows,
+    resolved.x,
+    resolved.y,
+    container.clientWidth,
+  );
+
   const plot_element = mosaic.plot(
     build_mark(mosaic, resolved.mark, rows, resolved.x, resolved.y),
-    mosaic.width(Math.max(320, container.clientWidth || 640)),
-    mosaic.height(280),
-    mosaic.marginLeft(60),
-    mosaic.marginBottom(40),
+    mosaic.width(layout.plot_width),
+    mosaic.height(layout.plot_height),
+    mosaic.marginLeft(layout.margin_left),
+    mosaic.marginBottom(layout.margin_bottom),
+    ...axis_layout_options(mosaic, layout),
   );
 
   container.appendChild(plot_element);
+}
+
+function axis_layout_options(
+  mosaic: mosaic_module,
+  layout: chart_axis_layout,
+): Array<(plot: unknown) => void> {
+  const options: Array<(plot: unknown) => void> = [];
+
+  if (layout.x_tick_rotate !== undefined) {
+    options.push(mosaic.xTickRotate(layout.x_tick_rotate));
+  }
+  if (layout.y_tick_rotate !== undefined) {
+    options.push(mosaic.yTickRotate(layout.y_tick_rotate));
+  }
+  if (layout.x_tick_format) {
+    options.push(mosaic.xTickFormat(layout.x_tick_format));
+  }
+  if (layout.y_tick_format) {
+    options.push(mosaic.yTickFormat(layout.y_tick_format));
+  }
+  if (layout.y_tick_spacing !== undefined) {
+    options.push(mosaic.yTickSpacing(layout.y_tick_spacing));
+  }
+
+  return options;
 }
