@@ -108,6 +108,7 @@ export function InsightChartBlock({
       </div>
 
       <InsightMosaicChart
+        insight_id={insight.id}
         query_result={insight.query_result}
         chart_spec={chart_spec}
       />

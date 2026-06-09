@@ -10,6 +10,7 @@ import { render_insight_chart } from "@/lib/mosaic/render_insight_chart";
 import type { chart_spec, query_result } from "@/lib/types/insights";
 
 type insight_mosaic_chart_props = {
+  insight_id: string;
   query_result: query_result;
   chart_spec: chart_spec;
 };
@@ -18,6 +19,7 @@ type insight_mosaic_chart_props = {
  * @param props - Insight query result and chart spec
  */
 export function InsightMosaicChart({
+  insight_id,
   query_result,
   chart_spec,
 }: insight_mosaic_chart_props) {
@@ -64,6 +66,7 @@ export function InsightMosaicChart({
   return (
     <div
       ref={container_ref}
+      data-chart-insight-id={insight_id}
       className="report-plot min-h-[280px] w-full overflow-x-auto overflow-y-auto print:overflow-visible"
       aria-label="Insight chart"
     />

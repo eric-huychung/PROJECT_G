@@ -67,7 +67,7 @@ export function ReportPage() {
           <Link href="/" className="min-w-0">
             <GLogo />
           </Link>
-          <DownloadPdfButton />
+          <DownloadPdfButton dataset_name={dataset_name} />
         </div>
       </header>
 
@@ -84,7 +84,7 @@ export function ReportPage() {
               <p className="truncate text-sm text-g-gray">
                 {status === "empty"
                   ? "Track insights on Discover to build your report"
-                  : "Verify cited numbers and download as PDF"}
+                  : "Verify cited numbers and download your report"}
               </p>
             </div>
           </div>
