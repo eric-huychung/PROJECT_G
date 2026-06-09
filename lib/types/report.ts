@@ -1,40 +1,30 @@
 /**
- * Report page types — chart data shapes and editable chart specs.
+ * Report page types — story segments and cached report story.
  */
 
-export type report_named_total = {
-  name: string;
-  total: number;
+export type story_text_segment = {
+  type: "text";
+  value: string;
 };
 
-export type report_fy_spend = {
-  fy: number;
-  total: number;
-  payments?: number;
+export type story_cite_segment = {
+  type: "cite";
+  insight_id: string;
+  label: string;
+  row: number;
+  col: number;
 };
 
-export type report_chart_kind = "bar" | "pie" | "fy_bar";
+export type story_segment = story_text_segment | story_cite_segment;
 
-export type report_chart_spec = {
-  id: string;
+export type report_story = {
   title: string;
-  subtitle: string;
-  kind: report_chart_kind;
+  segments: story_segment[];
+  generated_at: string;
+  tracked_insight_ids: string[];
 };
 
-export type report_chart_data_bundle = {
-  top_vendors: report_named_total[];
-  top_agencies: report_named_total[];
-  spend_by_category: report_named_total[];
-  spend_by_fy: report_fy_spend[];
-};
-
-export type report_resolved_chart = report_chart_spec & {
-  rows: report_named_total[] | report_fy_spend[];
-};
-
-export type report_content = {
+export type story_response = {
   title: string;
-  story: string;
-  charts: report_chart_spec[];
+  segments: story_segment[];
 };

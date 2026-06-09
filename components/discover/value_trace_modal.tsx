@@ -5,8 +5,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Copy, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Copy, X } from "lucide-react";
 
+import {
+  copy_text_to_clipboard,
+  format_trace_sql,
+  format_trace_table_csv,
+} from "@/lib/trace/format_trace_clipboard";
 import type { insight_trace } from "@/lib/types/discover";
 import { cn } from "@/lib/utils";
 
@@ -41,21 +46,38 @@ const SQL_KEYWORDS = new Set([
 const COPY_BUTTON_CLASS =
   "absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-g-gray transition-colors hover:bg-g-fill hover:text-g-ink";
 
-type value_trace_modal_props = {
-  trace: insight_trace;
-  on_close: () => void;
+type copy_button_props = {
+  label: string;
+  get_text: () => string;
 };
 
-/** UI-only copy control until clipboard wiring lands. */
-function CopyPlaceholderButton({ label }: { label: string }) {
+/** Copies trace content to the clipboard with brief confirmation. */
+function CopyButton({ label, get_text }: copy_button_props) {
+  const [copied, set_copied] = useState(false);
+
+  const handle_copy = async () => {
+    const ok = await copy_text_to_clipboard(get_text());
+    if (!ok) {
+      return;
+    }
+
+    set_copied(true);
+    window.setTimeout(() => set_copied(false), 2000);
+  };
+
   return (
     <button
       type="button"
-      aria-label={label}
-      title="Coming soon"
+      onClick={() => void handle_copy()}
+      aria-label={copied ? `${label} copied` : label}
+      title={copied ? "Copied" : label}
       className={COPY_BUTTON_CLASS}
     >
-      <Copy className="h-4 w-4" />
+      {copied ? (
+        <Check className="h-4 w-4 text-emerald-600" />
+      ) : (
+        <Copy className="h-4 w-4" />
+      )}
     </button>
   );
 }
@@ -96,6 +118,11 @@ function highlight_sql_line(line: string, line_key: number) {
     </span>
   );
 }
+
+type value_trace_modal_props = {
+  trace: insight_trace;
+  on_close: () => void;
+};
 
 /**
  * @param props - Trace payload and close handler
@@ -159,7 +186,10 @@ export function ValueTraceModal({ trace, on_close }: value_trace_modal_props) {
 
         <div className="min-h-0 flex-1 overflow-auto px-6 py-5">
           <div className="relative">
-            <CopyPlaceholderButton label="Copy table" />
+            <CopyButton
+              label="Copy table as CSV"
+              get_text={() => format_trace_table_csv(trace.table)}
+            />
             <div className="overflow-x-auto rounded-xl border border-g-fill">
               <table className="w-full min-w-[520px] border-collapse text-left text-sm">
                 <thead>
@@ -222,7 +252,10 @@ export function ValueTraceModal({ trace, on_close }: value_trace_modal_props) {
 
           {sql_open ? (
             <div className="relative mt-4">
-              <CopyPlaceholderButton label="Copy SQL" />
+              <CopyButton
+                label="Copy SQL"
+                get_text={() => format_trace_sql(trace.sql)}
+              />
               <div className="overflow-x-auto rounded-xl bg-g-fill/70 p-4">
                 <pre className="font-mono text-[13px] leading-6">
                   {sql_lines.map((line, index) => (

@@ -23,6 +23,7 @@ import type {
   query_response,
   result_preview,
 } from "@/lib/types/insights";
+import type { story_response } from "@/lib/types/report";
 
 async function post_json<T>(url: string, body: unknown): Promise<T> {
   assert_llm_not_in_cooldown();
@@ -111,5 +112,26 @@ export function fetch_insight_narrate(
     question,
     sql,
     result_preview,
+  });
+}
+
+export type story_insight_payload = {
+  id: string;
+  question: string;
+  narrative: string;
+  result_preview: result_preview;
+};
+
+/**
+ * @param user_prompt - Landing page goal
+ * @param insights - Tracked insights with capped previews
+ */
+export function fetch_insight_story(
+  user_prompt: string,
+  insights: story_insight_payload[],
+): Promise<story_response> {
+  return post_json<story_response>("/api/insights/story", {
+    user_prompt,
+    insights,
   });
 }

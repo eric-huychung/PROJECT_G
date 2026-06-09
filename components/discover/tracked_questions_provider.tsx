@@ -8,24 +8,65 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 
+import {
+  track_id_from_insight_id,
+  track_ids_to_insight_ids,
+} from "@/lib/insights/tracked_insights";
+import { load_workspace, patch_workspace } from "@/lib/storage/workspace_db";
+
 type tracked_questions_context_value = {
   is_tracked: (id: string) => boolean;
   toggle_track: (id: string) => void;
+  tracked_insight_count: number;
+  is_hydrated: boolean;
 };
 
 const TrackedQuestionsContext =
   createContext<tracked_questions_context_value | null>(null);
+
+async function persist_tracked_ids(track_ids: Set<string>): Promise<void> {
+  const tracked_insight_ids = track_ids_to_insight_ids(track_ids);
+  await patch_workspace({ tracked_insight_ids, report_story: undefined });
+}
 
 /**
  * @param props - Child discover routes
  */
 export function TrackedQuestionsProvider({ children }: { children: ReactNode }) {
   const [tracked_ids, set_tracked_ids] = useState<Set<string>>(new Set());
+  const [is_hydrated, set_is_hydrated] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    load_workspace()
+      .then((snapshot) => {
+        if (cancelled || !snapshot?.tracked_insight_ids?.length) {
+          return;
+        }
+
+        set_tracked_ids(
+          new Set(
+            snapshot.tracked_insight_ids.map((id) => track_id_from_insight_id(id)),
+          ),
+        );
+      })
+      .finally(() => {
+        if (!cancelled) {
+          set_is_hydrated(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const is_tracked = useCallback(
     (id: string) => tracked_ids.has(id),
@@ -40,13 +81,28 @@ export function TrackedQuestionsProvider({ children }: { children: ReactNode }) 
       } else {
         next.add(id);
       }
+
+      persist_tracked_ids(next).catch(() => {
+        /* ignore persistence errors in UI toggle */
+      });
+
       return next;
     });
   }, []);
 
+  const tracked_insight_count = useMemo(
+    () => track_ids_to_insight_ids(tracked_ids).length,
+    [tracked_ids],
+  );
+
   const value = useMemo(
-    () => ({ is_tracked, toggle_track }),
-    [is_tracked, toggle_track],
+    () => ({
+      is_tracked,
+      toggle_track,
+      tracked_insight_count,
+      is_hydrated,
+    }),
+    [is_tracked, toggle_track, tracked_insight_count, is_hydrated],
   );
 
   return (

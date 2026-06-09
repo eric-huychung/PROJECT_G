@@ -3,6 +3,7 @@
  */
 
 import type { workspace_insight } from "@/lib/types/insights";
+import type { report_story } from "@/lib/types/report";
 
 /** Stored when DuckDB rejects generated SQL — keyed by normalized question. */
 export type insight_sql_failure = {
@@ -30,6 +31,8 @@ export type workspace_snapshot = {
   suggested_questions?: string[];
   insights?: workspace_insight[];
   insight_failures?: Record<string, insight_sql_failure>;
+  tracked_insight_ids?: string[];
+  report_story?: report_story;
 };
 
 export type ingest_result = {

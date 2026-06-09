@@ -40,3 +40,23 @@ export const narrate_request_schema = z.object({
     row_count: z.number().int().nonnegative(),
   }),
 });
+
+const result_preview_schema = z.object({
+  columns: z.array(z.string()),
+  rows: z.array(z.array(z.string())),
+  row_count: z.number().int().nonnegative(),
+});
+
+export const story_request_schema = z.object({
+  user_prompt: z.string(),
+  insights: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        question: z.string().min(1),
+        narrative: z.string(),
+        result_preview: result_preview_schema,
+      }),
+    )
+    .min(1),
+});

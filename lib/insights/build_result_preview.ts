@@ -44,6 +44,21 @@ export function build_result_preview(
 }
 
 /**
+ * @param result - Stored insight query result
+ * @param max_rows - Cap for story / narrate payloads
+ */
+export function preview_from_query_result(
+  result: query_result,
+  max_rows = MAX_PREVIEW_ROWS,
+): result_preview {
+  return {
+    columns: result.columns,
+    rows: result.rows.slice(0, max_rows),
+    row_count: result.rows.length,
+  };
+}
+
+/**
  * Converts raw DuckDB rows into stored query_result for trace modal.
  *
  * @param rows - Full query result from DuckDB

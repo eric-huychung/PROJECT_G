@@ -1,5 +1,5 @@
 /**
- * Report page layout — dashboard canvas without the AI agent panel.
+ * Report page shell — header, canvas, and PDF export.
  */
 
 "use client";
@@ -12,18 +12,28 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { GLogo } from "@/components/branding/g_logo";
 import { DownloadPdfButton } from "@/components/report/download_pdf_button";
 import { ReportCanvas } from "@/components/report/report_canvas";
-import { DEFAULT_DATASET_SUMMARY } from "@/lib/mock/discover_data";
+import { use_report_workspace } from "@/components/report/report_workspace_provider";
+import { UserErrorBanner } from "@/components/ui/user_error_banner";
 
 export function ReportPage() {
   const search_params = useSearchParams();
+  const { status, error, snapshot } = use_report_workspace();
 
   const dataset_name = useMemo(() => {
-    return search_params.get("file") ?? DEFAULT_DATASET_SUMMARY.name;
-  }, [search_params]);
+    return (
+      search_params.get("file") ??
+      snapshot?.file_name ??
+      "Your dataset"
+    );
+  }, [search_params, snapshot]);
 
   const discover_href = useMemo(() => {
-    const file = search_params.get("file");
-    const size = search_params.get("size");
+    const file = search_params.get("file") ?? snapshot?.file_name;
+    const size =
+      search_params.get("size") ??
+      (snapshot?.file_size_bytes
+        ? String(snapshot.file_size_bytes)
+        : null);
 
     if (!file) {
       return "/discover";
@@ -35,7 +45,12 @@ export function ReportPage() {
     }
 
     return `/discover?${params.toString()}`;
-  }, [search_params]);
+  }, [search_params, snapshot]);
+
+  const show_canvas =
+    status === "generating_story" ||
+    status === "ready" ||
+    status === "error";
 
   return (
     <div className="relative flex min-h-screen w-full min-w-0 flex-col overflow-x-clip bg-g-white">
@@ -67,7 +82,9 @@ export function ReportPage() {
                 Your report
               </h1>
               <p className="truncate text-sm text-g-gray">
-                Edit the summary and charts, then download as PDF
+                {status === "empty"
+                  ? "Track insights on Discover to build your report"
+                  : "Verify cited numbers and download as PDF"}
               </p>
             </div>
           </div>
@@ -81,7 +98,37 @@ export function ReportPage() {
           </Link>
         </div>
 
-        <ReportCanvas dataset_name={dataset_name} />
+        {error ? (
+          <div className="mb-8">
+            <UserErrorBanner error={error} />
+          </div>
+        ) : null}
+
+        {status === "loading" ? (
+          <div className="glass-field rounded-3xl p-8 text-center text-sm text-g-gray animate-pulse">
+            Loading your report…
+          </div>
+        ) : null}
+
+        {status === "empty" ? (
+          <div className="glass-field rounded-3xl p-8 text-center">
+            <p className="mb-2 text-sm font-medium text-g-ink">
+              No insights selected yet
+            </p>
+            <p className="mb-6 text-sm text-g-gray">
+              On Discover, click insight cards to track them for your report, then
+              return here.
+            </p>
+            <Link
+              href={discover_href}
+              className="inline-flex items-center gap-2 rounded-2xl bg-g-navy px-6 py-3 text-sm font-medium text-g-white transition-colors hover:brightness-110"
+            >
+              Go to Discover
+            </Link>
+          </div>
+        ) : null}
+
+        {show_canvas ? <ReportCanvas dataset_name={dataset_name} /> : null}
       </main>
     </div>
   );
